@@ -40,6 +40,8 @@ test('build：Header・7 セクションが順に・4 Graph・Footer。部品は
   assert.match(html, /data-ref="health.jev_input_tokens" data-measured="false"/)
   // 本文の無いセクションは「本文なし」
   assert.equal((html.match(/<p class="empty">本文なし<\/p>/g) ?? []).length, 5)
+  // 枠の無いセクション（07）に undefined が出ない
+  assert.doesNotMatch(html, /undefined/)
 })
 
 test('Graph：値を図の中に書く・Funnel は通過率・空は未計測', () => {
