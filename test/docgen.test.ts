@@ -2,7 +2,7 @@ import assert from 'node:assert/strict'
 import { readFileSync } from 'node:fs'
 import { test } from 'node:test'
 import { parseBody } from '../src/body.ts'
-import { build, refExists } from '../src/build.ts'
+import { build, llmoSummary, refExists } from '../src/build.ts'
 import { hbarSvg, trendSvg } from '../src/charts.ts'
 import type { MonthlyData } from '../src/types.ts'
 
@@ -75,4 +75,27 @@ test('本文：使える部品は section / finding / action だけ・根拠は�
   )
   await assert.rejects(() => parseBody('::::section{n="09"}\nx\n::::\n', ok), /01〜07 でない/)
   await assert.rejects(() => parseBody('section の外の文\n', ok), /section\{n="NN"\} の中/)
+})
+
+test('llmoSummary：エンジンごとに、引用元を引用した質問の数で並べる（同じ質問の重複は 1 回・同数は名前順）', () => {
+  const s = llmoSummary([
+    { question: 'q1', engine: 'openai', cited: ['b.test', 'a.test', 'a.test'] },
+    { question: 'q2', engine: 'openai', cited: ['b.test'] },
+    { question: 'q1', engine: 'claude', cited: ['c.test'] },
+  ])
+  assert.deepEqual(s, [
+    { engine: 'claude', questions: 1, top: [{ domain: 'c.test', count: 1 }] },
+    {
+      engine: 'openai',
+      questions: 2,
+      top: [
+        { domain: 'b.test', count: 2 },
+        { domain: 'a.test', count: 1 },
+      ],
+    },
+  ])
+  const many = llmoSummary([
+    { question: 'q', engine: 'e', cited: Array.from({ length: 12 }, (_, i) => `d${i}.test`) },
+  ])
+  assert.equal(many[0]?.top.length, 8)
 })

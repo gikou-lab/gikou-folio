@@ -26,6 +26,31 @@ export function refExists(data: MonthlyData, ref: string): boolean {
   return g !== null && typeof g === 'object' && !Array.isArray(g) && key in (g as object)
 }
 
+export const LLMO_TOP = 8
+
+/** LLMO の観測（質問 × エンジン）を、エンジンごとの上位の引用元に縮める。同数はドメイン名の順 */
+export function llmoSummary(
+  llmo: NonNullable<MonthlyData['llmo']>,
+): { engine: string; questions: number; top: { domain: string; count: number }[] }[] {
+  const byEngine = new Map<string, { questions: number; counts: Map<string, number> }>()
+  for (const q of llmo) {
+    const e = byEngine.get(q.engine) ?? { questions: 0, counts: new Map() }
+    e.questions++
+    for (const d of new Set(q.cited)) e.counts.set(d, (e.counts.get(d) ?? 0) + 1)
+    byEngine.set(q.engine, e)
+  }
+  return [...byEngine.entries()]
+    .sort(([a], [b]) => a.localeCompare(b))
+    .map(([engine, e]) => ({
+      engine,
+      questions: e.questions,
+      top: [...e.counts.entries()]
+        .sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0]))
+        .slice(0, LLMO_TOP)
+        .map(([domain, count]) => ({ domain, count })),
+    }))
+}
+
 function prevMonth(month: string): string {
   const [y, m] = month.split('-').map(Number) as [number, number]
   return m === 1 ? `${y - 1}-12` : `${y}-${String(m - 1).padStart(2, '0')}`
@@ -79,15 +104,20 @@ export async function build(input: {
         4,
         '内容ごとの成果 — 題材ごとの新しい Claim',
         hbarSvg(data.by_topic, { title: '題材ごとの新しい Claim' }),
-        'Jev の topic の一覧（12 種）で数えた。',
+        '蒸留が付けた topic で数えた（一覧は蒸留の版で増減する）。',
         'by_topic',
       ),
     '05': data.llmo
       ? table(
-          ['質問', 'エンジン', '引用元'],
-          data.llmo.map((q) => [q.question, q.engine, q.cited.join(', ')]),
+          ['エンジン', '質問', '上位の引用元（引用した質問の数）'],
+          llmoSummary(data.llmo).map((e) => [
+            e.engine,
+            String(e.questions),
+            e.top.map((d) => `${d.domain} ${d.count}`).join(', '),
+          ]),
           'llmo',
-        )
+        ) +
+        `<p class="note">エンジンごとに、引用元のドメインを引用した質問の数で並べた上位 ${LLMO_TOP}。質問ごとの全件はデータファイルの llmo。</p>`
       : '<p class="empty" data-ref="llmo" data-measured="false">未計測。質問の台帳と基準値の観測は第 0 号の手順 6（段 3）。</p>',
     '06': metricGroup('health', data.health),
   }
