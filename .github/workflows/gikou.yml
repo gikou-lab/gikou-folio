@@ -1,9 +1,65 @@
-# GIKOU の再利用ワークフローを呼ぶ薄いファイル。何をどの順で検査するかは gikou 側にある。
+# GIKOU の検査（gikou-lab/gikou の .github/workflows/ci.yml）の写し。
+# この repo は public で、private の gikou-lab/gikou の再利用ワークフローを呼べない（GitHub の制約）ため、手順を写して持つ（2026-10-08）。
+# 手順を変えるときは gikou 側を正本にして、ここにも同じ変更を入れる
 name: gikou
 on:
   pull_request:
   push:
     branches: [main]
+permissions:
+  contents: read
 jobs:
   ci:
-    uses: gikou-lab/gikou/.github/workflows/ci.yml@main
+    runs-on: ubuntu-latest
+    concurrency:
+      group: ${{ github.workflow }}-${{ github.ref }}
+      cancel-in-progress: true
+    steps:
+      - uses: actions/checkout@v6
+      - name: filenames are NFC
+        run: |
+          git ls-files -z | python3 -c '
+          import sys, unicodedata
+          paths = sys.stdin.buffer.read().decode().split("\0")
+          bad = [p for p in paths if p and unicodedata.normalize("NFC", p) != p]
+          print("\n".join(bad))
+          sys.exit(1 if bad else 0)
+          '
+      - uses: pnpm/action-setup@v6
+        if: hashFiles('package.json') != ''
+      - uses: actions/setup-node@v6
+        if: hashFiles('package.json') != ''
+        with:
+          node-version-file: package.json
+          cache: pnpm
+      - name: install
+        if: hashFiles('package.json') != ''
+        run: pnpm install --frozen-lockfile
+      - name: lint
+        if: hashFiles('package.json') != ''
+        run: pnpm lint
+      - name: typecheck
+        if: hashFiles('package.json') != ''
+        run: pnpm typecheck
+      - name: test
+        if: hashFiles('package.json') != ''
+        run: pnpm test
+      - name: audit (prod, high)
+        if: hashFiles('package.json') != ''
+        run: pnpm audit --prod --audit-level high
+      - name: licenses (prod, permissive)
+        if: hashFiles('package.json') != ''
+        run: |
+          pnpm licenses list --prod --json | python3 -c '
+          import json, sys
+          allowed = {"MIT", "Apache-2.0", "ISC", "0BSD", "BSD-2-Clause", "BSD-3-Clause", "CC0-1.0"}
+          raw = sys.stdin.read()
+          # prod の依存が 0 のとき pnpm は JSON でなく "No licenses in packages found" と出す
+          data = json.loads(raw) if raw.lstrip().startswith("{") else {}
+          bad = {k: [p["name"] for p in v] for k, v in data.items() if k not in allowed}
+          print(json.dumps(bad, indent=1) if bad else f"{sum(map(len, data.values()))} prod packages, all permissive")
+          sys.exit(1 if bad else 0)
+          '
+      - name: generated files are current
+        if: hashFiles('package.json') != ''
+        run: pnpm run --if-present gen:check
