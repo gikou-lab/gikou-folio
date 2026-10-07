@@ -1,0 +1,211 @@
+{
+  "doc": {
+    "type": "monthly-observation",
+    "month": "2026-10",
+    "status": "DRAFT",
+    "domain": "EMDASH MEDIA",
+    "phase": "PRIVATE TRIAL",
+    "updated": "2026-10-06",
+    "version": "0.1",
+    "data_fixed_at": "2026-10-06",
+    "generated_by": "gikou-press docgen（枠）· 本文なし",
+    "human_checked": false
+  },
+  "metrics": {
+    "claims_new": {
+      "label": "新しい Claim",
+      "value": 671,
+      "prev": null
+    },
+    "sources_registered": {
+      "label": "登録した発信元",
+      "value": 17,
+      "prev": null
+    },
+    "articles_produced": {
+      "label": "制作本数",
+      "value": 1,
+      "prev": null
+    },
+    "search_cost_usd": {
+      "label": "検索コスト",
+      "value": 0,
+      "prev": null,
+      "unit": "USD"
+    }
+  },
+  "trend": [
+    {
+      "month": "2026-10",
+      "new_claims": 671,
+      "total_claims": 752
+    }
+  ],
+  "origin": [
+    {
+      "label": "公式 · docs",
+      "value": 574
+    },
+    {
+      "label": "公式 · サイト（ブログ）",
+      "value": 97
+    },
+    {
+      "label": "公式 · GitHub",
+      "value": 0
+    },
+    {
+      "label": "非公式（すべて）",
+      "value": 0
+    }
+  ],
+  "funnel": [
+    {
+      "label": "候補 URL（新規）",
+      "value": 196
+    },
+    {
+      "label": "関係あり（Jev 第 1 段）",
+      "value": 176
+    },
+    {
+      "label": "新しい情報あり（第 2 段）",
+      "value": 171
+    },
+    {
+      "label": "蒸留した",
+      "value": 35
+    }
+  ],
+  "by_topic": [
+    {
+      "label": "architecture",
+      "value": 189
+    },
+    {
+      "label": "security",
+      "value": 105
+    },
+    {
+      "label": "content",
+      "value": 92
+    },
+    {
+      "label": "hosting",
+      "value": 88
+    },
+    {
+      "label": "plugins",
+      "value": 47
+    },
+    {
+      "label": "agents",
+      "value": 38
+    },
+    {
+      "label": "templates",
+      "value": 27
+    },
+    {
+      "label": "release",
+      "value": 23
+    },
+    {
+      "label": "ecosystem",
+      "value": 17
+    },
+    {
+      "label": "migration",
+      "value": 13
+    },
+    {
+      "label": "pricing",
+      "value": 2
+    },
+    {
+      "label": "other",
+      "value": 3
+    },
+    {
+      "label": "一覧外（v0 の自由語）",
+      "value": 27
+    }
+  ],
+  "content": {
+    "articles_draft": {
+      "label": "記事（draft）",
+      "value": 1,
+      "prev": null
+    },
+    "verify_agree": {
+      "label": "検証 agree",
+      "value": 6,
+      "prev": null
+    },
+    "verify_disagree": {
+      "label": "検証 disagree / unsure",
+      "value": 0,
+      "prev": null
+    },
+    "verify_disagree_first": {
+      "label": "初版で拾った言い過ぎ",
+      "value": 1,
+      "prev": null
+    },
+    "approved": {
+      "label": "承認",
+      "value": 0,
+      "prev": null
+    },
+    "returned": {
+      "label": "差し戻し",
+      "value": 0,
+      "prev": null
+    }
+  },
+  "llmo": null,
+  "health": {
+    "jev_mismatch": {
+      "label": "Jev と Registry の種別の食い違い",
+      "value": 12,
+      "prev": null
+    },
+    "duplicate_claims_retrieval": {
+      "label": "重複（取得の失敗）",
+      "value": 4,
+      "prev": null
+    },
+    "duplicate_claims_judgement": {
+      "label": "重複（判定の失敗）",
+      "value": 0,
+      "prev": null
+    },
+    "search_skipped": {
+      "label": "飛ばした検索",
+      "value": 3,
+      "prev": null
+    },
+    "fetch_fail": {
+      "label": "取得・判定の失敗",
+      "value": 10,
+      "prev": null
+    },
+    "jev_cost_usd": {
+      "label": "Jev の費用（現金）",
+      "value": 0.03,
+      "prev": null,
+      "unit": "USD"
+    },
+    "claude_equiv_usd": {
+      "label": "Claude（枠・相当額）",
+      "value": 11.22,
+      "prev": null,
+      "unit": "USD"
+    },
+    "jev_input_tokens": {
+      "label": "Jev の入力トークン",
+      "value": null,
+      "prev": null
+    }
+  }
+}

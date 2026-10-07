@@ -1,0 +1,75 @@
+/*
+  GIKOU Media Design Token — 正本（2026-10-05）
+  見て決める板は design/index.html。Astro（実装計画 段 2b）はこのファイルを読む。
+  3 分類は「誰の言葉か」を「誰の色か」で示す。文字は常に黒（色文字を使わない）。
+  モノクロ印刷が前提：3 色は灰色にしたとき濃さが 3 段（濃・中・淡）に分かれる値を選ぶ。
+  地色は印刷で落ちてよい。見分けは帯の濃さ・アイコン・ラベルで担保する。
+*/
+:root {
+  /* 公式 = Cloudflare のロゴの 2 色（灰色にすると中 ≈ 151） */
+  --source-official-fg: #f38020;
+  --source-official-light: #faae40;
+  --source-official-bg: #fef3e4;
+
+  /* 非公式 = 淡い緑（どの発信者の色でもない。灰色にすると淡 ≈ 196） */
+  --source-unofficial-fg: #9ed9be;
+  --source-unofficial-light: #cdeedd;
+  --source-unofficial-bg: #eef8f3;
+
+  /* GIKOU Media = GIKOU の青（灰色にすると濃 ≈ 67） */
+  --source-gikou-media-fg: #164a94;
+  --source-gikou-media-light: #7cb8f0;
+  --source-gikou-media-bg: #e8f1fc;
+
+  /* 地と文字 */
+  --ink: #1a1c1f;
+  --muted: #3a3f47; /* 注記・日付。印刷でくっきり出る濃さ */
+  --line: #d9dce1;
+  --paper: #ffffff;
+  --canvas: #f7f7f8;
+
+  /* リンク：GIKOU の青＋下線。GIKOU Media の帯と同じ値だが、下線で見分ける */
+  --link: var(--source-gikou-media-fg);
+
+  /* 月次レポートの Graph は無彩色（3 分類の色と混ぜない） */
+  --chart-1: #3a3f47;
+  --chart-2: #b8bdc5;
+
+  /* 書体（仮置き・未決） */
+  --font-sans: "IBM Plex Sans JP", "Hiragino Sans", "Noto Sans JP", sans-serif;
+  --font-mono: "IBM Plex Mono", ui-monospace, Menlo, monospace;
+
+  /* 本文幅・余白・大きさ（GIKOU テーマの最小セット） */
+  --measure: 40rem;
+  --space-1: 0.25rem;
+  --space-2: 0.5rem;
+  --space-3: 0.75rem;
+  --space-4: 1rem;
+  --space-6: 1.5rem;
+  --space-8: 2rem;
+  --text-xs: 0.6875rem;
+  --text-sm: 0.75rem;
+  --text-base: 0.875rem;
+  --text-lg: 1.125rem;
+  --text-xl: 1.25rem;
+  --text-2xl: 1.75rem;
+  --leading: 1.7;
+  --radius: 4px;
+}
+
+/* Primitive は data-source-type だけ見て色を当てる（R-UI-4） */
+[data-source-type="official"] {
+  --sfg: var(--source-official-fg);
+  --slight: var(--source-official-light);
+  --sbg: var(--source-official-bg);
+}
+[data-source-type="unofficial"] {
+  --sfg: var(--source-unofficial-fg);
+  --slight: var(--source-unofficial-light);
+  --sbg: var(--source-unofficial-bg);
+}
+[data-source-type="gikou_media"] {
+  --sfg: var(--source-gikou-media-fg);
+  --slight: var(--source-gikou-media-light);
+  --sbg: var(--source-gikou-media-bg);
+}

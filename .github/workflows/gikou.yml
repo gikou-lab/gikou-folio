@@ -1,0 +1,9 @@
+# GIKOU の再利用ワークフローを呼ぶ薄いファイル。何をどの順で検査するかは gikou 側にある。
+name: gikou
+on:
+  pull_request:
+  push:
+    branches: [main]
+jobs:
+  ci:
+    uses: gikou-lab/gikou/.github/workflows/ci.yml@main
