@@ -1,6 +1,6 @@
 {
   "name": "gikou-folio",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "GIKOU folio：データと本文から、読むための A4 の HTML（folio）を作る純粋な関数。ボタンを押す画面ではなく、読む 1 枚（または数枚）を返す。印刷すれば PDF。Node でも Cloudflare の Worker でも動く",
   "private": true,
   "type": "module",
@@ -9,14 +9,18 @@
     "node": "26"
   },
   "exports": {
-    ".": "./src/index.ts"
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    }
   },
   "scripts": {
     "lint": "biome check",
     "typecheck": "tsc",
     "test": "node --test \"test/**/*.test.ts\"",
+    "build": "node scripts/gen-css.ts && tsc -p tsconfig.build.json",
     "gen:css": "node scripts/gen-css.ts",
-    "gen:check": "node scripts/gen-css.ts --check"
+    "gen:check": "node scripts/gen-css.ts --check && node scripts/check-dist.ts"
   },
   "dependencies": {
     "rehype-stringify": "^10.0.1",
@@ -29,5 +33,10 @@
     "@biomejs/biome": "2.5.14",
     "@types/node": "26.6.3",
     "typescript": "7.0.2"
-  }
+  },
+  "files": [
+    "dist",
+    "src",
+    "README.md"
+  ]
 }
