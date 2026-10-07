@@ -47,4 +47,4 @@ const html = await build({ data, body, docType: 'monthly-observation', theme: 'g
 
 ## 公開について
 
-この repo は public。中身はコード・CSS・テストだけで、秘密は入れない。コミットの作者は GitHub の匿名アドレス（`…@users.noreply.github.com`）にする。テストの見本データは、GIKOU Media の月次レポート第 0 号の本物の数字（出力を本物と見比べるため）。
+この repo は public で、**MIT ライセンス**（著作者 GIKOU・2026-10-07）。中身はコード・CSS・テストだけで、秘密は入れない。コミットの作者は GitHub の匿名アドレス（`…@users.noreply.github.com`）にする。テストの見本データは、GIKOU Media の月次レポート第 0 号の本物の数字（出力を本物と見比べるため）。
