@@ -21,6 +21,7 @@ const html = await build({ data, body, docType: 'monthly-observation', theme: 'g
 ## 決まり
 
 - **Node でも Cloudflare の Worker でも動く**。`src/` は `node:` の機能もファイルも使わない（`test/worker.test.ts` が止める）
+- **使う側は `dist/`（JavaScript と型の定義）を読む**。Node は `node_modules` の中の TypeScript を読まない（`ERR_UNSUPPORTED_NODE_MODULES_TYPE_STRIPPING`）ため。`src/` を直したら `pnpm build` で `dist/` を作り直す。CI の `gen:check` が `src/` と `dist/` の食い違いを止める
 - **CSS は文字列で持つ**。直すのは `src/tokens.css`（Design Token・正本）と `src/docgen.css`（Print CSS）で、`pnpm gen:css` が `src/css.ts` を作る。CI の `gen:check` が食い違いを止める
 - **根拠の無い文は止める**。本文の `finding` の根拠がデータファイルに無ければビルドを止める。生の HTML は落とす
 - folio はインデクサーも LLMO も Registry も知らない。渡されたデータと本文を描くだけ
@@ -37,6 +38,7 @@ const html = await build({ data, body, docType: 'monthly-observation', theme: 'g
 | `src/charts.ts` | グラフを SVG に（横棒・推移） |
 | `src/tokens.css`・`src/docgen.css` | Design Token と Print CSS（正本） |
 | `src/css.ts` | 上の 2 つを 1 本にした生成物 |
+| `dist/` | `src/` を JavaScript に変換した生成物（使う側が読む） |
 
 ## これからの直し
 
