@@ -49,9 +49,11 @@ export async function build(input) {
             : '<p class="empty" data-ref="llmo" data-measured="false">未計測。質問の台帳と基準値の観測は第 0 号の手順 6（段 3）。</p>',
         '06': metricGroup('health', data.health),
     };
-    const sections = SECTION_NUMBERS.map((n) => section(n, TITLES[n], frame[n] + text(n))).join('\n');
+    const sections = SECTION_NUMBERS.map((n) => section(n, TITLES[n], (frame[n] ?? '') + text(n))).join('\n');
     const css = CSS;
-    const builtAt = input.builtAt ?? new Date().toISOString().slice(0, 10);
+    // 手元の日付（UTC だと JST の朝は前日になる）
+    const builtAt = input.builtAt ??
+        new Date(Date.now() - new Date().getTimezoneOffset() * 60000).toISOString().slice(0, 10);
     return `<!doctype html>
 <html lang="ja" data-doc-type="${data.doc.type}" data-theme="${input.theme}">
 <head><meta charset="utf-8"><meta name="robots" content="noindex"><title>Monthly Observation ${escapeHtml(data.doc.month)} · GIKOU Media</title>
