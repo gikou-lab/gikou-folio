@@ -99,3 +99,36 @@ test('llmoSummary：エンジンごとに、引用元を引用した質問の数
   ])
   assert.equal(many[0]?.top.length, 8)
 })
+
+test('日報（daily-observation）：見出し・前日比・30 日の推移（数字は最後の日だけ）・LLMO は載せない。種類が違えば止める', async () => {
+  const days = Array.from({ length: 20 }, (_, i) => ({
+    month: `2026-10-${String(i + 1).padStart(2, '0')}`,
+    new_claims: 10 + i,
+    total_claims: 100 + i * 10,
+  }))
+  const daily: MonthlyData = {
+    ...data,
+    doc: { ...data.doc, type: 'daily-observation', month: '2026-10-08' },
+    trend: days,
+    llmo: null,
+    metrics: { claims_new: { label: '新しい Claim', value: 30, prev: 20 } },
+  }
+  const html = await build({
+    data: daily,
+    body: '',
+    docType: 'daily-observation',
+    theme: 'gikou',
+    builtAt: '2026-10-09',
+  })
+  assert.match(html, /<h1>DAILY OBSERVATION<\/h1>/)
+  assert.match(html, /2026 年 10 月 8 日/)
+  assert.match(html, /\+10 vs 前日/)
+  assert.match(html, /30 日の推移 — 日ごとの新しい Claim と累計/)
+  assert.equal((html.match(/>新 /g) ?? []).length, 1)
+  assert.match(html, />10\/20</)
+  assert.match(html, /日報には載せない/)
+  await assert.rejects(
+    build({ data: daily, body: '', docType: 'monthly-observation', theme: 'gikou' }),
+    /文書の種類/,
+  )
+})

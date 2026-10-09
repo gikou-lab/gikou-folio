@@ -64,23 +64,34 @@ export async function build(input: {
   builtAt?: string
 }): Promise<string> {
   const { data } = input
-  if (input.docType !== 'monthly-observation' || data.doc.type !== 'monthly-observation')
-    throw new Error(`文書の種類 ${input.docType} はまだ無い`)
+  if (
+    (input.docType !== 'monthly-observation' && input.docType !== 'daily-observation') ||
+    data.doc.type !== input.docType
+  )
+    throw new Error(`文書の種類 ${input.docType} はまだ無い（データは ${data.doc.type}）`)
+  const daily = input.docType === 'daily-observation'
   if (input.theme !== 'gikou') throw new Error(`テーマ ${input.theme} はまだ無い`)
   const body = await parseBody(input.body, (r) => refExists(data, r))
-  const prev = prevMonth(data.doc.month).slice(5)
+  const prev = daily ? '前日' : prevMonth(data.doc.month).slice(5)
+  const noPrev = daily ? '前日なし' : '前月なし'
   const text = (n: string) => body.get(n) ?? '<p class="empty">本文なし</p>'
 
   // 枠が描く部分（Agent は置けない）
   const frame: Record<string, string> = {
     '01': '',
     '02':
-      metricGroup('metrics', data.metrics, prev) +
+      metricGroup('metrics', data.metrics, prev, noPrev) +
       chart(
         1,
-        '12 か月の推移 — 月ごとの新しい Claim と累計',
-        trendSvg(data.trend),
-        'ある月だけを描く。空の月を 0 として描かない。',
+        daily
+          ? '30 日の推移 — 日ごとの新しい Claim と累計'
+          : '12 か月の推移 — 月ごとの新しい Claim と累計',
+        daily
+          ? trendSvg(data.trend, { max: 30, daily: true, title: '30 日の推移' })
+          : trendSvg(data.trend),
+        daily
+          ? 'ある日だけを描く（日本時間で区切る）。空の日を 0 として描かない。'
+          : 'ある月だけを描く。空の月を 0 として描かない。',
         'trend',
       ),
     '03':
@@ -99,7 +110,7 @@ export async function build(input: {
         'funnel',
       ),
     '04':
-      metricGroup('content', data.content) +
+      metricGroup('content', data.content, prev, noPrev) +
       chart(
         4,
         '内容ごとの成果 — 題材ごとの新しい Claim',
@@ -118,8 +129,10 @@ export async function build(input: {
           'llmo',
         ) +
         `<p class="note">エンジンごとに、引用元のドメインを引用した質問の数で並べた上位 ${LLMO_TOP}。質問ごとの全件はデータファイルの llmo。</p>`
-      : '<p class="empty" data-ref="llmo" data-measured="false">未計測。質問の台帳と基準値の観測は第 0 号の手順 6（段 3）。</p>',
-    '06': metricGroup('health', data.health),
+      : daily
+        ? '<p class="empty" data-ref="llmo" data-measured="false">LLMO は月に 1 回の観測で、日報には載せない（月次レポートの 05）。</p>'
+        : '<p class="empty" data-ref="llmo" data-measured="false">未計測。質問の台帳と基準値の観測は第 0 号の手順 6（段 3）。</p>',
+    '06': metricGroup('health', data.health, prev, noPrev),
   }
   const sections = SECTION_NUMBERS.map((n) =>
     section(n, TITLES[n], (frame[n] ?? '') + text(n)),
@@ -132,7 +145,7 @@ export async function build(input: {
     new Date(Date.now() - new Date().getTimezoneOffset() * 60000).toISOString().slice(0, 10)
   return `<!doctype html>
 <html lang="ja" data-doc-type="${data.doc.type}" data-theme="${input.theme}">
-<head><meta charset="utf-8"><meta name="robots" content="noindex"><title>Monthly Observation ${escapeHtml(data.doc.month)} · GIKOU Media</title>
+<head><meta charset="utf-8"><meta name="robots" content="noindex"><title>${daily ? 'Daily' : 'Monthly'} Observation ${escapeHtml(data.doc.month)} · GIKOU Media</title>
 <style>:root{--month:"${escapeHtml(data.doc.month)}"}${css}</style></head>
 <body><main class="sheet" data-doc-type="${data.doc.type}">
 ${documentHeader(data.doc)}
