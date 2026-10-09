@@ -28,10 +28,19 @@ export function hbarSvg(bars: Bar[], opts: { title: string; percentOfFirst?: boo
   return `<svg viewBox="0 0 ${W} ${h}" role="img" aria-label="${escapeHtml(opts.title)}">${rows}</svg>`
 }
 
-/** Graph 1：月ごとの新しい Claim（棒）と累計（線）。空の月を 0 として描かない——ある月だけ */
-export function trendSvg(trend: MonthlyData['trend']): string {
-  if (trend.length === 0) return hbarSvg([], { title: '12 か月の推移' })
-  const months = trend.slice(-12)
+/**
+ * Graph 1：期間ごとの新しい Claim（棒）と累計（線）。空の期間を 0 として描かない——ある期間だけ。
+ * 日報は 30 日まで描き、ラベルは MM/DD。棒が 12 を超えるときは、数字を最後の期間だけに付ける（重なるため）
+ */
+export function trendSvg(
+  trend: MonthlyData['trend'],
+  opts: { max?: number; title?: string; daily?: boolean } = {},
+): string {
+  const title = opts.title ?? '12 か月の推移'
+  if (trend.length === 0) return hbarSvg([], { title })
+  const months = trend.slice(-(opts.max ?? 12))
+  const dense = months.length > 12
+  const label = (p: string) => (opts.daily ? p.slice(5).replace('-', '/') : p)
   const h = 180
   const top = 24
   const bottom = 28
@@ -43,21 +52,22 @@ export function trendSvg(trend: MonthlyData['trend']): string {
   const parts: string[] = []
   const points: string[] = []
   months.forEach((m, i) => {
+    const last = i === months.length - 1
     const cx = step * i + step / 2
     const bh = Math.round((m.new_claims / maxNew) * plotH * 0.8)
     const by = top + plotH - bh
     parts.push(
-      `<g data-month="${m.month}" data-new="${m.new_claims}" data-total="${m.total_claims}"><rect x="${cx - barW / 2}" y="${by}" width="${barW}" height="${bh}" fill="var(--chart-2)"/><text x="${cx}" y="${by - 6}" text-anchor="middle">新 ${fmt(m.new_claims)}</text><text x="${cx}" y="${h - 8}" text-anchor="middle">${m.month}</text></g>`,
+      `<g data-month="${m.month}" data-new="${m.new_claims}" data-total="${m.total_claims}"><rect x="${cx - barW / 2}" y="${by}" width="${barW}" height="${bh}" fill="var(--chart-2)"/>${dense && !last ? '' : `<text x="${cx}" y="${by - 6}" text-anchor="middle">新 ${fmt(m.new_claims)}</text>`}${dense && i % 5 !== 0 && !last ? '' : `<text x="${cx}" y="${h - 8}" text-anchor="middle">${label(m.month)}</text>`}</g>`,
     )
     const ly = top + plotH - Math.round((m.total_claims / maxTotal) * plotH)
     points.push(`${cx},${ly}`)
     parts.push(
-      `<circle cx="${cx}" cy="${ly}" r="3" fill="var(--chart-1)"/><text x="${cx + 8}" y="${ly + 4}">累計 ${fmt(m.total_claims)}</text>`,
+      `<circle cx="${cx}" cy="${ly}" r="3" fill="var(--chart-1)"/>${dense && !last ? '' : `<text x="${cx + 8}" y="${ly + 4}">累計 ${fmt(m.total_claims)}</text>`}`,
     )
   })
   const line =
     points.length > 1
       ? `<polyline points="${points.join(' ')}" fill="none" stroke="var(--chart-1)" stroke-width="1.5"/>`
       : ''
-  return `<svg viewBox="0 0 ${W} ${h}" role="img" aria-label="12 か月の推移">${line}${parts.join('')}</svg>`
+  return `<svg viewBox="0 0 ${W} ${h}" role="img" aria-label="${escapeHtml(title)}">${line}${parts.join('')}</svg>`
 }

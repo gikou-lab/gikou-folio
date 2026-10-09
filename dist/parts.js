@@ -3,7 +3,8 @@ import { escapeHtml } from './html.js';
 // 種別・状態を data 属性に残す（LLM が HTML を読むときにも構造が伝わる）
 const n = (v) => v === null ? '未計測' : Number.isInteger(v) ? v.toLocaleString('en-US') : v.toFixed(2);
 export function documentHeader(doc) {
-    const [y, m] = doc.month.split('-');
+    const [y, m, d] = doc.month.split('-');
+    const daily = doc.type === 'daily-observation';
     const rows = [
         ['STATUS', doc.status],
         ['DOMAIN', doc.domain],
@@ -12,26 +13,26 @@ export function documentHeader(doc) {
         ['VERSION', doc.version],
     ];
     return `<header class="doc-header" data-part="DocumentHeader" data-doc-type="${doc.type}" data-status="${doc.status}" data-phase="${doc.phase}">
-<div class="kicker">GIKOU MEDIA</div><h1>MONTHLY OBSERVATION</h1><hr>
-<div class="month">${y} 年 ${Number(m)} 月</div>
+<div class="kicker">GIKOU MEDIA</div><h1>${daily ? 'DAILY' : 'MONTHLY'} OBSERVATION</h1><hr>
+<div class="month">${y} 年 ${Number(m)} 月${daily ? ` ${Number(d)} 日` : ''}</div>
 <dl>${rows.map(([k, v]) => `<dt>${k}</dt><dd>${escapeHtml(v)}</dd>`).join('')}</dl><hr></header>`;
 }
 export function section(num, title, inner) {
     return `<section class="section" data-part="Section" data-section="${num}"><h2><small>${num}</small>${escapeHtml(title)}</h2>${inner}</section>`;
 }
-export function metric(key, m, prevLabel) {
+export function metric(key, m, prevLabel, noPrev = '前月なし') {
     let delta = '';
     if (m.value !== null && m.prev !== null) {
         const d = m.value - m.prev;
         delta = `${d > 0 ? '+' : d < 0 ? '−' : '±'}${n(Math.abs(d))}${prevLabel ? ` vs ${prevLabel}` : ''}`;
     }
     else if (m.value !== null)
-        delta = '前月なし';
+        delta = noPrev;
     return `<div class="metric" data-part="Metric" data-ref="${escapeHtml(key)}" data-measured="${m.value !== null}"><span class="label">${escapeHtml(m.label)}</span><span class="value">${n(m.value)}${m.unit && m.value !== null ? `<small>${escapeHtml(m.unit)}</small>` : ''}</span><span class="delta">${delta}</span><span class="ref">${escapeHtml(key)}</span></div>`;
 }
-export function metricGroup(group, metrics, prevLabel) {
+export function metricGroup(group, metrics, prevLabel, noPrev) {
     return `<div class="metrics" data-part="MetricGroup">${Object.entries(metrics)
-        .map(([k, m]) => metric(`${group}.${k}`, m, prevLabel))
+        .map(([k, m]) => metric(`${group}.${k}`, m, prevLabel, noPrev))
         .join('')}</div>`;
 }
 export function chart(num, title, svg, caption, ref) {

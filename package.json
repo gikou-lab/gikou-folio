@@ -1,6 +1,6 @@
 {
   "name": "gikou-folio",
-  "version": "0.2.3",
+  "version": "0.3.0",
   "description": "GIKOU folio：データと本文から、読むための A4 の HTML（folio）を作る純粋な関数。ボタンを押す画面ではなく、読む 1 枚（または数枚）を返す。印刷すれば PDF。Node でも Cloudflare の Worker でも動く",
   "license": "MIT",
   "private": true,
