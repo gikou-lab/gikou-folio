@@ -11,10 +11,24 @@ export declare function llmoSummary(llmo: NonNullable<MonthlyData['llmo']>): {
         count: number;
     }[];
 }[];
+/** 題（タブ・PDF の題）。名前は使う側のデータ（doc.domain）から。folio は名前を持たない（v0.3.1） */
+export declare function documentTitle(doc: {
+    type: string;
+    month: string;
+    domain: string;
+}): string;
+/** 印刷の各ページの頭の帯（例「FUKUSHI INDEX · DAILY OBSERVATION · 2026-10-13」） */
+export declare function runningHead(doc: {
+    type: string;
+    month: string;
+    domain: string;
+}): string;
 export declare function build(input: {
     data: MonthlyData;
     body: string;
     docType: DocType;
     theme: Theme;
     builtAt?: string;
+    /** 出さない節の番号（例 ['04', '05']）。どの節を出すかは使う側が決める（v0.3.1） */
+    omit?: readonly string[];
 }): Promise<string>;
