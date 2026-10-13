@@ -56,6 +56,22 @@ function prevMonth(month: string): string {
   return m === 1 ? `${y - 1}-12` : `${y}-${String(m - 1).padStart(2, '0')}`
 }
 
+/** 題（タブ・PDF の題）。名前は使う側のデータ（doc.domain）から。folio は名前を持たない（v0.3.1） */
+export function documentTitle(doc: { type: string; month: string; domain: string }): string {
+  const kind = doc.type === 'daily-observation' ? 'Daily' : 'Monthly'
+  return `${doc.domain} · ${kind} Observation ${doc.month}`
+}
+
+/** 印刷の各ページの頭の帯（例「FUKUSHI INDEX · DAILY OBSERVATION · 2026-10-13」） */
+export function runningHead(doc: { type: string; month: string; domain: string }): string {
+  const kind = doc.type === 'daily-observation' ? 'DAILY' : 'MONTHLY'
+  return `${doc.domain} · ${kind} OBSERVATION · ${doc.month}`
+}
+
+/** CSS の文字列（"…"）。\ と " を逃がし、改行と < は空白に（style の中で閉じタグを作らない） */
+const cssString = (s: string) =>
+  `"${s.replace(/\\/g, '\\\\').replace(/"/g, '\\"').replace(/[\n<]/g, ' ')}"`
+
 export async function build(input: {
   data: MonthlyData
   body: string
@@ -145,8 +161,8 @@ export async function build(input: {
     new Date(Date.now() - new Date().getTimezoneOffset() * 60000).toISOString().slice(0, 10)
   return `<!doctype html>
 <html lang="ja" data-doc-type="${data.doc.type}" data-theme="${input.theme}">
-<head><meta charset="utf-8"><meta name="robots" content="noindex"><title>${daily ? 'Daily' : 'Monthly'} Observation ${escapeHtml(data.doc.month)} · GIKOU Media</title>
-<style>:root{--month:"${escapeHtml(data.doc.month)}"}${css}</style></head>
+<head><meta charset="utf-8"><meta name="robots" content="noindex"><title>${escapeHtml(documentTitle(data.doc))}</title>
+<style>:root{--month:${cssString(data.doc.month)};--running-head:${cssString(runningHead(data.doc))}}${css}</style></head>
 <body><main class="sheet" data-doc-type="${data.doc.type}">
 ${documentHeader(data.doc)}
 ${sections}

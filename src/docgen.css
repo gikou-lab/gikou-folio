@@ -237,7 +237,8 @@ table.data td {
   size: A4;
   margin: 18mm 16mm 20mm;
   @top-left {
-    content: "GIKOU MEDIA · MONTHLY OBSERVATION · " var(--month, "");
+    /* 文字は使う側のデータから組んで :root の --running-head に入れる（名前を folio に置かない・v0.3.1） */
+    content: var(--running-head, "");
     font-family: var(--font-mono);
     font-size: 8pt;
     color: #3a3f47;
