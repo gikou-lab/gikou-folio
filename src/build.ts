@@ -78,6 +78,8 @@ export async function build(input: {
   docType: DocType
   theme: Theme
   builtAt?: string
+  /** 出さない節の番号（例 ['04', '05']）。どの節を出すかは使う側が決める（v0.3.1） */
+  omit?: readonly string[]
 }): Promise<string> {
   const { data } = input
   if (
@@ -150,9 +152,10 @@ export async function build(input: {
         : '<p class="empty" data-ref="llmo" data-measured="false">未計測。質問の台帳と基準値の観測は第 0 号の手順 6（段 3）。</p>',
     '06': metricGroup('health', data.health, prev, noPrev),
   }
-  const sections = SECTION_NUMBERS.map((n) =>
-    section(n, TITLES[n], (frame[n] ?? '') + text(n)),
-  ).join('\n')
+  const omit = new Set(input.omit ?? [])
+  const sections = SECTION_NUMBERS.filter((n) => !omit.has(n))
+    .map((n) => section(n, TITLES[n], (frame[n] ?? '') + text(n)))
+    .join('\n')
 
   const css = CSS
   // 手元の日付（UTC だと JST の朝は前日になる）

@@ -29,4 +29,6 @@ export declare function build(input: {
     docType: DocType;
     theme: Theme;
     builtAt?: string;
+    /** 出さない節の番号（例 ['04', '05']）。どの節を出すかは使う側が決める（v0.3.1） */
+    omit?: readonly string[];
 }): Promise<string>;

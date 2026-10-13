@@ -34,3 +34,17 @@ test('build：題と帯がデータから入り、CSS に名前の決め打ち�
   assert.match(html, /--running-head:"A \\"B\\" {2}C> · DAILY OBSERVATION · 2026-10-13"/)
   assert.doesNotMatch(html, /· GIKOU Media<\/title>/)
 })
+
+test('build：omit の節は出さない（どの節を出すかは使う側が決める）', async () => {
+  const html = await build({
+    data,
+    body: '',
+    docType: 'monthly-observation',
+    theme: 'gikou',
+    builtAt: '2026-10-14',
+    omit: ['04', '05'],
+  })
+  assert.match(html, /data-section="03"/)
+  assert.doesNotMatch(html, /data-section="04"|data-section="05"/)
+  assert.match(html, /data-section="06"/)
+})
